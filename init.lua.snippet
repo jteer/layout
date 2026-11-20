@@ -1,0 +1,5 @@
+-- Append to ~/.config/rex/init.lua; edit layout_dir if not installed at the default.
+local layout_dir = os.getenv("HOME") .. "/.config/rex/layout"
+package.path = layout_dir .. "/?.lua;" .. package.path
+require("layout.actions")
+rex.bind("shift+cmd+s", "layout_capture")

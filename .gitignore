@@ -1,0 +1,5 @@
+.DS_Store
+stamps.json
+*.tmp
+.layout-test-stamps.json
+Layoutfile.captured.*
