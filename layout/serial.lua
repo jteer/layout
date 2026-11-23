@@ -28,18 +28,11 @@ local function key_repr(k)
   return "[" .. quote(tostring(k)) .. "]"
 end
 
-local function number(v)
-  if v == math.floor(v) then return string.format("%d", v) end
-  local s = string.format("%.14g", v)
-  if tonumber(s) ~= v then s = string.format("%.17g", v) end
-  return s
-end
-
 local function render(v, depth)
   if v == nil or v == json.null then return "nil" end
   local t = type(v)
   if t == "boolean" then return v and "true" or "false" end
-  if t == "number" then return number(v) end
+  if t == "number" then return util.format_number(v) end
   if t == "string" then return quote(v) end
   if t ~= "table" then return "nil" end
   local pad = string.rep("  ", depth)

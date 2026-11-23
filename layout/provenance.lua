@@ -47,7 +47,7 @@ function M.set_file(path)
 end
 
 local function read_all()
-  local text, err = util.read_file(M.file())
+  local text = util.read_file(M.file())
   if not text then return {} end
   local ok, data = pcall(json.decode, text)
   if not ok or type(data) ~= "table" then

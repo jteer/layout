@@ -30,7 +30,7 @@ local function deep_equal(a, b)
   return true
 end
 
--- Set below. The attach response has to return the same view.
+-- Set below. The attach resse has to return the same view.
 local fake_view = {}
 
 local calls = {}
@@ -79,7 +79,7 @@ rex = {
     end
     return nil, "not available"
   end,
-  wait = function(event, filter, timeout)
+  wait = function(_, _, _)
     return { record = { app = "vite", state = "idle" } }
   end,
 }
