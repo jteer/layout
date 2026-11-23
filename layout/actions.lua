@@ -25,13 +25,17 @@ local function capture_run(ctx, args)
   if fmt == nil then return { cancelled = true, reason = why } end
   local scope, why2 = ui.scope(args.scope)
   if scope == nil then return { cancelled = true, reason = why2 } end
-  local dest, why3 = ui.destination(args.path, fmt)
-  if dest == nil then return { cancelled = true, reason = why3 } end
 
   local session_id = current_session(args, ctx)
   if not session_id then
     return { error = "no session found; pass session=ID" }
   end
+  local block_id = ctx.block_id or rex.block_id
+
+  local dest, why3 = ui.destination(args.path, fmt, {
+    base_dir = args.path == nil and capture.block_cwd(session_id, block_id) or nil,
+  })
+  if dest == nil then return { cancelled = true, reason = why3 } end
 
   local view, err = session.view(session_id)
   if err ~= nil then error("[layout] session.view failed: " .. tostring(err), 0) end
@@ -39,7 +43,7 @@ local function capture_run(ctx, args)
   local stamp = provenance.get(session_id)
   local ir = capture.build(view, {
     scope = scope,
-    ctx = { session_id = session_id, block_id = ctx.block_id or rex.block_id },
+    ctx = { session_id = session_id, block_id = block_id },
     session_id = session_id,
     name = args.name or view.label,
   })

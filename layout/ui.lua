@@ -6,6 +6,8 @@
 -- 17) or a cancelled prompt all have a defined outcome. "Running Without a
 -- Person" from the Rex docs is the rule: every prompt is bypassable by an arg.
 
+local util = require("layout.util")
+
 local M = {}
 
 local function log(level, msg)
@@ -89,8 +91,16 @@ end
 
 -- Default to a captured filename so an unattended run never overwrites the
 -- source Layoutfile in the working directory. Pass path=- to write nothing.
-function M.destination(provided, fmt)
-  local default = "Layoutfile.captured." .. (fmt == "json" and "json" or "lua")
+--
+-- opts.base_dir, when given, anchors the default to a real directory (e.g.
+-- the focused block's cwd) instead of wherever this process happens to run
+-- from. opts is a table, not positional args, so a later way of picking a
+-- destination (browsing with com.superlogical.terminal.list_dir, say) can
+-- add its own key here without touching this signature or its callers.
+function M.destination(provided, fmt, opts)
+  opts = opts or {}
+  local name = "Layoutfile.captured." .. (fmt == "json" and "json" or "lua")
+  local default = opts.base_dir and util.path(opts.base_dir, name) or name
   return M.input{
     provided = provided,
     default = default,

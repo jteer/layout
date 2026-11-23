@@ -92,6 +92,13 @@ local function clean_pwd(v)
   return (v:gsub("^file://[^/]*", ""))
 end
 
+-- Exposed so callers (layout.actions) can default a save destination to
+-- where the user is actually looking, instead of wherever this process
+-- happens to run from. nil if the block has no recoverable cwd.
+function M.block_cwd(session_id, block_id)
+  return clean_pwd(block_method("pwd", block_id, session_id))
+end
+
 local function block_node(n, opts, warnings, meta)
   meta = meta or {}
   local b = (type(n.block) == "table") and n.block or n
