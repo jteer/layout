@@ -1,0 +1,14 @@
+{
+  "name": "json-recipe",
+  "session": { "label": "json-recipe" },
+  "windows": [
+    {
+      "label": "main",
+      "layout": {
+        "block": "logs",
+        "label": "logs",
+        "command": ["tail", "-f", "dev.log"]
+      }
+    }
+  ]
+}

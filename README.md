@@ -161,6 +161,8 @@ return {
 
 Arg types are `string`, `number`, `integer`, `boolean`, `object`, `array`, `any`. A trailing `?` makes an arg optional.
 
+More Layoutfiles, each showing one piece in isolation (a minimal spec, nested splits, arg handling, the JSON form), are in [`examples/`](examples/).
+
 ## How capture works
 
 `capture` walks `session.view`. A window's layout lives in the tiled layer as a tree of leaf nodes (`{ rect, block_id }`) and split nodes (`{ rect, split: { direction, ratio, before, after } }`). Labels, flavors and creators sit in a separate `blocks[]` array on that same layer, so capture joins them back by `block_id`. Working directories come from `com.superlogical.terminal.pwd`, which reports `file://host/path` and needs an explicit `session_id` in Lua. Any drift from the stamped recipe goes into the output as warnings.
@@ -179,3 +181,12 @@ Tested against Rex `0.1.0-preview.21` (api revision 18).
 cd /path/to/layout
 luajit tests/test.lua
 ```
+
+`tests/test.lua` exercises every module against a fake `rex` global, no server needed. For a check against a real server, `tests/integration.sh` creates a disposable session, drives it through the scripts and the `layout_capture`/`layout_status` actions, and tears it down:
+
+```sh
+cd /path/to/layout
+tests/integration.sh
+```
+
+It needs `rex` connected to a server with the actions registered (see above) and `jq`.

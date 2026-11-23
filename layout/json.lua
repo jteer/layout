@@ -29,10 +29,7 @@ end
 
 local function number(v)
   if v ~= v or v == math.huge or v == -math.huge then return "null" end
-  if v == math.floor(v) then return string.format("%d", v) end
-  local s = string.format("%.14g", v)
-  if tonumber(s) ~= v then s = string.format("%.17g", v) end
-  return s
+  return util.format_number(v)
 end
 
 local function encode(v, opts, depth)

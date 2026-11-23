@@ -40,6 +40,15 @@ function M.path(...)
   return out or ""
 end
 
+-- Shared by json.lua and serial.lua: the shortest round-tripping decimal for
+-- a Lua number, used verbatim in both JSON and Lua source output.
+function M.format_number(v)
+  if v == math.floor(v) then return string.format("%d", v) end
+  local s = string.format("%.14g", v)
+  if tonumber(s) ~= v then s = string.format("%.17g", v) end
+  return s
+end
+
 function M.root()
   local r = os.getenv("LAYOUT_ROOT")
   if r and r ~= "" then return r end
