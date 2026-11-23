@@ -34,7 +34,7 @@ local function capture_run(ctx, args)
   end
 
   local view, err = session.view(session_id)
-  if err ~= nil then error(err, 0) end
+  if err ~= nil then error("[layout] session.view failed: " .. tostring(err), 0) end
 
   local stamp = provenance.get(session_id)
   local ir = capture.build(view, {
@@ -68,42 +68,51 @@ local function capture_run(ctx, args)
   }
 end
 
-rex.action{
-  name = "layout_capture",
-  title = "Layout: Save Session as Recipe...",
-  description = "Write the current window or whole session to a Layoutfile.",
-  category = "Layout",
-  args = { format = "string?", scope = "string?", path = "string?",
-           name = "string?", session = "string?" },
-  run = capture_run,
-}
+local function status_run(ctx, args)
+  ctx = ctx or {}
+  args = args or {}
+  local session_id = current_session(args, ctx)
+  if not session_id then
+    return { stamped = false, reason = "no session found; pass session=ID" }
+  end
+  local stamp = provenance.get(session_id)
+  if not stamp then
+    return { stamped = false, session_id = session_id,
+             reason = "This session was not created by layout up." }
+  end
+  return {
+    stamped = true,
+    session_id = session_id,
+    spec_path = stamp.spec_path,
+    created_at = stamp.created_at,
+    spec = stamp.spec,
+  }
+end
 
-rex.action{
-  name = "layout_status",
-  title = "Layout: Show Recipe",
-  description = "Show the recipe stamped on this session at creation time.",
-  category = "Layout",
-  args = { session = "string?" },
-  run = function(ctx, args)
-    ctx = ctx or {}
-    args = args or {}
-    local session_id = current_session(args, ctx)
-    if not session_id then
-      return { stamped = false, reason = "no session found; pass session=ID" }
-    end
-    local stamp = provenance.get(session_id)
-    if not stamp then
-      return { stamped = false, session_id = session_id,
-               reason = "This session was not created by layout up." }
-    end
-    return {
-      stamped = true,
-      session_id = session_id,
-      spec_path = stamp.spec_path,
-      created_at = stamp.created_at,
-      spec = stamp.spec,
-    }
-  end,
-}
+local M = { capture_run = capture_run, status_run = status_run }
 
-return { capture_run = capture_run }
+-- Called once from init.lua, at server startup. Kept separate from the run
+-- functions above so a script (capture.lua) can reuse capture_run via
+-- `rex do` without re-registering the palette commands every run.
+function M.register()
+  rex.action{
+    name = "layout_capture",
+    title = "Layout: Save Session as Recipe...",
+    description = "Write the current window or whole session to a Layoutfile.",
+    category = "Layout",
+    args = { format = "string?", scope = "string?", path = "string?",
+             name = "string?", session = "string?" },
+    run = capture_run,
+  }
+
+  rex.action{
+    name = "layout_status",
+    title = "Layout: Show Recipe",
+    description = "Show the recipe stamped on this session at creation time.",
+    category = "Layout",
+    args = { session = "string?" },
+    run = status_run,
+  }
+end
+
+return M
