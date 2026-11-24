@@ -57,13 +57,11 @@ Rex won't tell capture what command started each block, so those come back as pl
 ### Option A: default location, no configuration
 
 ```sh
-cp -r /path/to/layout ~/.config/rex/layout
-cat ~/.config/rex/layout/init.lua.snippet >> ~/.config/rex/init.lua
-rex config check
+./install.sh
 rex config reload      # on the machine running the Rex server
 ```
 
-`~/.config/rex/layout` is the default for `LAYOUT_ROOT`, `spec.find()` and the stamp store. The snippet works out its own path from `HOME`, so there's nothing to edit. One catch: `rex config reload` is refused over a remote connection, so run it on the machine hosting the Rex server.
+`install.sh` copies the repo to `~/.config/rex/layout` (or `$LAYOUT_ROOT`, if set) and appends the init snippet to `~/.config/rex/init.lua`, skipping the append if it's already there, so it's safe to re-run. It backs up `init.lua` first and runs `rex config check` for you. No keybinding is added unless you set `LAYOUT_KEYBIND`, e.g. `LAYOUT_KEYBIND=shift+cmd+s ./install.sh`. One catch: `rex config reload` is refused over a remote connection, so run it on the machine hosting the Rex server.
 
 ### Option B: keep this repo in place
 
@@ -117,13 +115,24 @@ rex do status.lua
 
 Every prompt can be skipped by passing the argument instead. `format`, `scope`, `path` and `name` are all optional. If there's no app around to show a prompt, Layout warns and uses the default. Prompts need control API revision 17.
 
-The same thing is in the command palette as `layout_capture`, with `layout_status` for the drift report. Both have a keybinding, so it's one keypress inside Rex:
+The same thing is in the command palette as `layout_capture`, with `layout_status` for the drift report (see Keybindings, below, to bind either to a key):
 
 ```sh
 rex do layout_capture scope=window format=lua path=Layoutfile.lua
 ```
 
 `path=-` writes no file. It returns the recipe text in the result, so a `rex do` script (running locally, where the CLI is) can redirect it to your laptop. Actions from `init.lua` run on the server, though, so a file saved from the palette lands on the server's disk. On a remote server that difference matters.
+
+### Keybindings
+
+Neither action is bound to a key by default, add what you want in `~/.config/rex/init.lua`, after the `require("layout.actions").register()` line:
+
+```lua
+rex.bind("<key>", "layout_capture")
+rex.bind("<key>", "layout_status")
+```
+
+Then `rex config check && rex config reload` on the machine hosting the Rex server. If you installed with `install.sh`, re-running it with `LAYOUT_KEYBIND=<key>` set does the `layout_capture` bind for you (see Install, above).
 
 Outside a Rex terminal there's no `REX_SESSION`, so `capture.lua`, `status.lua` and the palette actions fall back to the first session on the server. You can point them somewhere else with `session=`: a full ID, a label, a 1-based position, or a short ID suffix. The API won't let you read the view until the connection is attached, so capture does that first.
 
